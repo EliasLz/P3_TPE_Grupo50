@@ -6,87 +6,129 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class Servicios implements ServiciosEnunciado {
+public class Servicios {
 
-    // Complejidad constructor: O(N*N)
     private HashMap<String, Paquete> paquetesPorCodigo;
     private List<Paquete> conAlimentos;
     private List<Paquete> sinAlimentos;
     private Tree paquetesPorUrgencia;
+    private List<Camion> camiones;
+    private List<Paquete> paquetes;
+    private int mejorPesoNoAsignado;
+
+    public int estadosGenerados = 0;
+    public int candidatosConsiderados = 0;
 
     public Servicios(String pathCamiones, String pathPaquetes) {
         paquetesPorCodigo = new HashMap<>();
         conAlimentos = new ArrayList<>();
         sinAlimentos = new ArrayList<>();
         paquetesPorUrgencia = new Tree();
+        camiones = new ArrayList<>();
+        paquetes = new ArrayList<>();
         this.cargarCamiones(pathCamiones);
         this.cargarPaquetes(pathPaquetes);
     }
 
-    // Complejidad servicio 1: O(1)
+    // O(1)
     public Paquete servicio1(String codigoPaquete) {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // Complejidad servicio 2:
+    // O(1)
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos) return new ArrayList<>(this.conAlimentos);
         return new ArrayList<>(this.sinAlimentos);
     }
 
-    // Complejidad servicio 3:
+    // O(log n + k)
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
 
-    public List<Camion> backtracking(List<Camion> camiones, List<Paquete> paquetes) {
-        HashSet<Paquete> asignados = new HashSet<>();
-        List<Camion> solucion = new ArrayList<>();
-        for (Paquete p : paquetes) {
-            backtrackingHelper(camiones, paquetes, p, asignados, solucion, 0, 0, 0);
-        }
-        /*faltaria que retorne el precio no asignado y la metrica para analizar el costo de la solucion */
-        return solucion;
+    public List<Camion> getCamiones() { return camiones; }
+    public List<Paquete> getPaquetes() { return paquetes; }
+    public int getMejorPesoNoAsignado() { return mejorPesoNoAsignado; }
+/*
+ * Estrategia Backtracking: se explora el espacio de soluciones asignando cada paquete
+ * a algún camión disponible o dejándolo sin asignar. Para cada paquete se prueban
+ * todas las opciones válidas (respetando capacidad y refrigeración), actualizando
+ * la mejor solución cuando se minimiza el peso no asignado.
+ */
+    public List<Camion> backtracking() {
+        estadosGenerados = 0;
+        int pesoTotal = 0;
+        for (Paquete p : paquetes)
+            pesoTotal += p.getPeso();
+
+        mejorPesoNoAsignado = pesoTotal;
+        int[] mejorPesoArr = {pesoTotal};
+        List<Camion> mejorSolucion = new ArrayList<>();
+
+        backtrackingHelper(0, pesoTotal, mejorPesoArr, mejorSolucion);
+        mejorPesoNoAsignado = mejorPesoArr[0];
+        return mejorSolucion;
     }
 
-    private void backtrackingHelper(List<Camion> camiones, List<Paquete> paquetes, Paquete p, HashSet<Paquete> asignados, List<Camion> solucion, int pesoActual, int pesoTotal, int indexPaquete) {
+    private void backtrackingHelper(int indexPaquete, int pesoNoAsignado,
+                                    int[] mejorPesoNoAsignado, List<Camion> mejorSolucion) {
+        estadosGenerados++;
+
         if (indexPaquete == paquetes.size()) {
-            pesoActual = getPesoNoAsignados(asignados, paquetes);
-            if (pesoActual < pesoTotal) {
-                pesoTotal = pesoActual;
-                solucion.addAll(camiones);
+            if (pesoNoAsignado < mejorPesoNoAsignado[0]) {
+                mejorPesoNoAsignado[0] = pesoNoAsignado;
+                mejorSolucion.clear();
+                mejorSolucion.addAll(camiones);
             }
-        } else {
+            return;
+        }
+
+        Paquete p = paquetes.get(indexPaquete);
+
+        for (Camion c : camiones) {
+            if (p.isConAlimentos() && !c.isRefrigerado()) continue;
+            if (c.asignarPaquete(p)) {
+                backtrackingHelper(indexPaquete + 1, pesoNoAsignado - p.getPeso(),
+                        mejorPesoNoAsignado, mejorSolucion);
+                c.removerPaquete(p);
+            }
+        }
+
+    
+        backtrackingHelper(indexPaquete + 1, pesoNoAsignado, mejorPesoNoAsignado, mejorSolucion);
+    }
+
+/*
+ * Estrategia Greedy: se ordenan los paquetes de mayor a menor peso para asignar
+ * primero los más difíciles de ubicar (mas pesados). Para cada paquete se selecciona el camión 
+ * con menor espacio disponible que aún pueda recibir el paquete actual, 
+ * aprovechando el espacio restante en camiones con mayor capacidad.
+ */
+    public List<Camion> greedy() {
+        candidatosConsiderados = 0;
+
+        List<Paquete> paquetesOrdenados = new ArrayList<>(paquetes);
+        paquetesOrdenados.sort((a, b) -> b.getPeso() - a.getPeso());
+
+        for (Paquete p : paquetesOrdenados) {
+            Camion mejorCamion = null;
+            int menorEspacioDisponible = Integer.MAX_VALUE;
+
             for (Camion c : camiones) {
-                if (p.isConAlimentos()) {
-                    if (c.isRefrigerado()) {
-                        if (c.asignarPaquete(p)) {
-                            asignados.add(p);
-                            backtrackingHelper(camiones, paquetes, p, asignados, solucion, pesoActual, pesoTotal, indexPaquete + 1);
-                            asignados.remove(p);
-                            c.removerPaquete(p);
-                        }
-                    }
-                } else {
-                    if (c.asignarPaquete(p)) {
-                        asignados.add(p);
-                        backtrackingHelper(camiones, paquetes, p, asignados, solucion, pesoActual, pesoTotal, indexPaquete + 1);
-                        asignados.remove(p);
-                        c.removerPaquete(p);
-                    }
+                candidatosConsiderados++;
+                if (p.isConAlimentos() && !c.isRefrigerado()) continue;
+                int espacioDisponible = c.getCapacidadMaxima() - c.getCapacidadActual();
+                if (espacioDisponible >= p.getPeso() && espacioDisponible < menorEspacioDisponible) {
+                    menorEspacioDisponible = espacioDisponible;
+                    mejorCamion = c;
                 }
             }
-        }
-    }
 
-    private int getPesoNoAsignados(HashSet<Paquete> asignados, List<Paquete> paquetes) {
-        int peso = 0;
-        for (Paquete p : paquetes) {
-            if (!asignados.contains(p)) {
-                peso += p.getPeso();
-            }
+            if (mejorCamion != null)
+                mejorCamion.asignarPaquete(p);
         }
-        return peso;
+
+        return camiones;
     }
 
     private void cargarCamiones(String pathCamiones) {
@@ -94,25 +136,15 @@ public class Servicios implements ServiciosEnunciado {
             String linea;
             boolean first = true;
             while ((linea = br.readLine()) != null) {
-                if (first) {
-                    first = false;
-                    continue;
-                }
-                if (linea.isBlank()) {
-                    continue;
-                }
+                if (first) { first = false; continue; }
+                if (linea.isBlank()) continue;
                 String[] partes = linea.split(";", -1);
                 int id = Integer.parseInt(partes[0].trim());
                 String patente = partes[1].trim();
-                boolean refrigerado = partes[3].trim().equals("1");
-                int capacidadMaxima = Integer.parseInt(partes[4].trim());
-
+                boolean refrigerado = partes[2].trim().equals("1");
+                int capacidadMaxima = Integer.parseInt(partes[3].trim());
                 Camion c = new Camion(id, patente, refrigerado, capacidadMaxima);
-                // Para despues: Agregar aquí el add a las estructuas de datos para camiones...
-                //...
-                //...
-                //...
-                
+                camiones.add(c);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -124,22 +156,16 @@ public class Servicios implements ServiciosEnunciado {
             String linea;
             boolean first = true;
             while ((linea = br.readLine()) != null) {
-                //Salta la primera fila deberia guardar la cantidad de elementos para algo?
-                if (first) {
-                    first = false;
-                    continue;
-                }
-                if (linea.isBlank()) {
-                    continue;
-                }
+                if (first) { first = false; continue; }
+                if (linea.isBlank()) continue;
                 String[] partes = linea.split(";", -1);
                 int id = Integer.parseInt(partes[0].trim());
                 String codigo = partes[1].trim();
                 int peso = Integer.parseInt(partes[2].trim());
                 boolean tieneAlimentos = partes[3].trim().equals("1");
                 int urgencia = Integer.parseInt(partes[4].trim());
-
                 Paquete p = new Paquete(id, codigo, peso, tieneAlimentos, urgencia);
+                paquetes.add(p);
                 paquetesPorCodigo.put(codigo, p);
                 paquetesPorUrgencia.add(p);
                 if (tieneAlimentos) conAlimentos.add(p);
@@ -149,5 +175,4 @@ public class Servicios implements ServiciosEnunciado {
             e.printStackTrace();
         }
     }
-
 }
