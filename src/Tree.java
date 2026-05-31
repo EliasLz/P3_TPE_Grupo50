@@ -30,24 +30,24 @@ public class Tree {
         }
     }
 
+    // searchRange - busca todos los nodos dentro de un rango [min, max] inclusive
     public List<Paquete> searchRange(int min, int max) {
-        return searchRange(this.root, min, max);
+        ArrayList<Paquete> result = new ArrayList<>();
+        searchRange(result, this.root, min, max);
+        return result;
     }
 
-    // searchRange - busca todos los nodos dentro de un rango [min, max] inclusive
-    private List<Paquete> searchRange(TreeNode n, int min, int max) {
-        List<Paquete> result = new ArrayList<>();
-        if (n == null) return result;
-        if (n.getUrgencia() > max)
-            result.addAll(searchRange(n.getLeft(), min, max));
-        else if (n.getUrgencia() < min)
-            result.addAll(searchRange(n.getRight(), min, max));
-        else {
-            result.addAll(searchRange(n.getLeft(), min, max));
-            result.add(n.getPaquete());
-            result.addAll(searchRange(n.getRight(), min, max));
+    private void searchRange(List<Paquete> acumulador, TreeNode n, int min, int max) {
+        if (n == null) return;
+        if (n.getUrgencia() > max) {
+            searchRange(acumulador, n.getLeft(), min, max);
+        } else if (n.getUrgencia() < min) {
+            searchRange(acumulador, n.getRight(), min, max);
+        } else {
+            searchRange(acumulador, n.getLeft(), min, max);
+            acumulador.add(n.getPaquete());
+            searchRange(acumulador, n.getRight(), min, max);
         }
-        return result;
     }
 
 }

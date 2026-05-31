@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Servicios implements ServiciosEnunciado {
 
-    // Complejidad constructor: O(N*N)
+    // Complejidad constructor: O(n²) si está completamente desbalanceado, O(n log n) si está balanceado.
     private HashMap<String, Paquete> paquetesPorCodigo;
     private List<Paquete> conAlimentos;
     private List<Paquete> sinAlimentos;
@@ -28,13 +28,13 @@ public class Servicios implements ServiciosEnunciado {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // Complejidad servicio 2:
+    // Complejidad servicio 2: O(n)
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos) return new ArrayList<>(this.conAlimentos);
         return new ArrayList<>(this.sinAlimentos);
     }
 
-    // Complejidad servicio 3:
+    // Complejidad servicio 3: O(n) si es lo resolvemos con acumulador, O(n²) como está
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
@@ -112,7 +112,7 @@ public class Servicios implements ServiciosEnunciado {
                 //...
                 //...
                 //...
-                
+
             }
         } catch (IOException e) {
             e.printStackTrace();
