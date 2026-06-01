@@ -31,23 +31,23 @@ public class Tree {
     }
 
     public List<Paquete> searchRange(int min, int max) {
-        return searchRange(this.root, min, max);
+        List<Paquete> result= new ArrayList<>();
+        searchRange(this.root, min, max, result);
+        return result;
     }
 
     // searchRange - busca todos los nodos dentro de un rango [min, max] inclusive
-    private List<Paquete> searchRange(TreeNode n, int min, int max) {
-        List<Paquete> result = new ArrayList<>();
-        if (n == null) return result;
-        if (n.getUrgencia() > max)
-            result.addAll(searchRange(n.getLeft(), min, max));
-        else if (n.getUrgencia() < min)
-            result.addAll(searchRange(n.getRight(), min, max));
-        else {
-            result.addAll(searchRange(n.getLeft(), min, max));
-            result.add(n.getPaquete());
-            result.addAll(searchRange(n.getRight(), min, max));
-        }
-        return result;
+   private  void searchRange(TreeNode n, int min, int max, List<Paquete> result) {
+    if (n == null) return;
+    if (n.getUrgencia() > max)
+        searchRange(n.getLeft(), min, max, result);
+    else if (n.getUrgencia() < min)
+        searchRange(n.getRight(), min, max, result);
+    else {
+        searchRange(n.getLeft(), min, max, result);
+        result.add(n.getPaquete());
+        searchRange(n.getRight(), min, max, result);
     }
+}
 
 }

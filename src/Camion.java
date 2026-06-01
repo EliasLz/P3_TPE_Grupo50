@@ -18,6 +18,15 @@ public class Camion {
         this.paquetesAsignados = new ArrayList<>();
     }
 
+    public Camion(Camion otro) {
+        this.id = otro.id;
+        this.patente = otro.patente;
+        this.refrigerado = otro.refrigerado;
+        this.capacidadMaxima = otro.capacidadMaxima;
+        this.capacidadActual = otro.capacidadActual;
+        this.paquetesAsignados = new ArrayList<>(otro.paquetesAsignados);
+    }
+
     public int getId() {
         return id;
     }
@@ -48,14 +57,15 @@ public class Camion {
     }
 
     public void removerPaquete(Paquete paquete) {
-        paquetesAsignados.remove(paquete); /* podria mejorarse ya que arraylist 
-                                            recorre todos los paquetes para borrar O(n)*/
+        paquetesAsignados.remove(paquete); /*
+                                            * podria mejorarse ya que arraylist
+                                            * recorre todos los paquetes para borrar O(n)
+                                            */
         capacidadActual -= paquete.getPeso();
     }
 
     public int getCapacidadActual() {
         return capacidadActual;
     }
-
 
 }
