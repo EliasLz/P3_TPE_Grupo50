@@ -1,17 +1,17 @@
 public class TreeNode {
-    private int urgencia;
+    private int getClaveUrgencia;
     private Paquete paquete;
     private TreeNode left;
     private TreeNode right;
 
     public TreeNode(Paquete paquete) {
-        this.urgencia = paquete.getUrgencia();
+        this.getClaveUrgencia = paquete.getUrgencia();
         this.paquete = paquete;
         this.left = null;
         this.right = null;
     }
 
-    public int getUrgencia() { return urgencia; }
+    public int getClaveUrgencia() { return getClaveUrgencia; }
     public Paquete getPaquete() { return paquete; }
     public TreeNode getLeft() { return left; }
     public TreeNode getRight() { return right; }

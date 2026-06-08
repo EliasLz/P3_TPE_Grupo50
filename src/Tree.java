@@ -17,7 +17,7 @@ public class Tree {
     }
 
     private void add(TreeNode actual, Paquete paquete) {
-        if (actual.getUrgencia() > paquete.getUrgencia()) {
+        if (actual.getClaveUrgencia() > paquete.getUrgencia()) {
             if (actual.getLeft() == null)
                 actual.setLeft(new TreeNode(paquete));
             else
@@ -30,24 +30,37 @@ public class Tree {
         }
     }
 
+    /**
+     * Busca nodos dentro de un rango
+     * @param min Límite inferior del rango (inclusive)
+     * @param max Límite superior del rango (inclusive)
+     * @return Collección de paquetes dentro del rango (ordenada)
+     */
     public List<Paquete> searchRange(int min, int max) {
-        List<Paquete> result= new ArrayList<>();
+        List<Paquete> result = new ArrayList<>();
         searchRange(this.root, min, max, result);
         return result;
     }
 
-    // searchRange - busca todos los nodos dentro de un rango [min, max] inclusive
-   private  void searchRange(TreeNode n, int min, int max, List<Paquete> result) {
-    if (n == null) return;
-    if (n.getUrgencia() > max)
-        searchRange(n.getLeft(), min, max, result);
-    else if (n.getUrgencia() < min)
-        searchRange(n.getRight(), min, max, result);
-    else {
-        searchRange(n.getLeft(), min, max, result);
-        result.add(n.getPaquete());
-        searchRange(n.getRight(), min, max, result);
+    /**
+     * Busqueda recursiva en el BTS con poda según el rango (ordenada)
+     * @param n      Nodo actal
+     * @param min    Minimo del rango
+     * @param max    Máximo del rango
+     * @param result Colección de valores dentro de rango hallados (acumulador)
+     */
+    private void searchRange(TreeNode n, int min, int max, List<Paquete> result) {
+        if (n == null) return;
+        int clave = n.getClaveUrgencia();
+        if (clave > min) {
+            searchRange(n.getLeft(), min, max, result);
+        }
+        if (clave >= min && clave <= max){
+            result.add(n.getPaquete());
+        }
+        if (clave < max) {
+            searchRange(n.getRight(), min, max, result);
+        }
     }
-}
 
 }

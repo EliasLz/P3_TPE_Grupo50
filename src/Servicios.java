@@ -18,7 +18,11 @@ public class Servicios {
     public int estadosGenerados = 0;
     public int candidatosConsiderados = 0;
 
-    /*O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones N=Paquetes*/
+    //ver
+    //yo
+    // Complejidad constructor: O(n²) si está completamente desbalanceado, O(n log n) si está balanceado.
+   //gero
+    /* O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones N=Paquetes */
     public Servicios(String pathCamiones, String pathPaquetes) {
         paquetesPorCodigo = new HashMap<>();
         conAlimentos = new ArrayList<>();
@@ -30,33 +34,40 @@ public class Servicios {
         this.cargarPaquetes(pathPaquetes);
     }
 
-    // O(1)
+    /**
+     * Devuelve el paquete asociado a un código específico
+     * @implNote Complejidad: O(1) promedio, considerando posibles colisiones de hash
+     * @param codigoPaquete Identificador único del paquete a buscar
+     * @return El objeto Paquete correspondiente al código, o null si no lo encuentra
+     */
     public Paquete servicio1(String codigoPaquete) {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento
+    /**
+     * Devuelve una colección de paquetes filtrada por si tienen o no alimentos
+     * @implNote Complejidad: O(n), se crea y devuelve una copia
+     * @param contieneAlimentos El tipo de colección solicitada
+     *                          True: con alimentos
+     *                          False: sin alimentos
+     * @return Una nueva lista con los paquetes que cumplen la condición
+     */
     public List<Paquete> servicio2(boolean contieneAlimentos) {
-        if (contieneAlimentos)
+        if (contieneAlimentos) {
             return new ArrayList<>(this.conAlimentos);
+        }
         return new ArrayList<>(this.sinAlimentos);
     }
 
-    // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado)
+    /**
+     * Devuelve una colección de peques según un rango de urgencia
+     * @implNote Complejidad: O(n), el rango puede abarcar todo el arbol
+     * @param urgenciaMinima Límite inferior del rango
+     * @param urgenciaMaxima Límite superior del rango
+     * @return Colección de paquetes dentro del rango
+     */
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
-    }
-
-    public List<Camion> getCamiones() {
-        return camiones;
-    }
-
-    public List<Paquete> getPaquetes() {
-        return paquetes;
-    }
-
-    public int getMejorPesoNoAsignado() {
-        return mejorPesoNoAsignado;
     }
 
     /*
@@ -155,6 +166,10 @@ public class Servicios {
         return camiones;
     }
 
+    /**
+     * Carga camiones desde un archivo CSV
+     * @param pathCamiones Ruta del archivo CSV
+     */
     private void cargarCamiones(String pathCamiones) {
         try (BufferedReader br = new BufferedReader(new FileReader(pathCamiones))) {
             String linea;
@@ -179,6 +194,10 @@ public class Servicios {
         }
     }
 
+    /**
+     * Carga Paquetes desde un archivo CSV
+     * @param pathPaquetes Ruta del archivo CSV
+     */
     private void cargarPaquetes(String pathPaquetes) {
         try (BufferedReader br = new BufferedReader(new FileReader(pathPaquetes))) {
             String linea;
@@ -219,4 +238,17 @@ public class Servicios {
 
         return copia;
     }
+
+    public List<Camion> getCamiones() {
+        return camiones;
+    }
+
+    public List<Paquete> getPaquetes() {
+        return paquetes;
+    }
+
+    public int getMejorPesoNoAsignado() {
+        return mejorPesoNoAsignado;
+    }
+
 }
