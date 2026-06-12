@@ -42,7 +42,7 @@ public class Servicios {
         return new ArrayList<>(this.sinAlimentos);
     }
 
-    // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado)
+    // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado o todos los nodos estan dentro del rango)
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
