@@ -14,11 +14,17 @@ public class Servicios {
     private List<Camion> camiones;
     private List<Paquete> paquetes;
     private int mejorPesoNoAsignado;
-
-    public int estadosGenerados = 0;
     public int candidatosConsiderados = 0;
+    private int estadosGenerados;
 
-    /*O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones N=Paquetes*/
+    public int getEstadosGenerados() {
+        return estadosGenerados;
+    }
+
+    /*
+     * O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones
+     * N=Paquetes
+     */
     public Servicios(String pathCamiones, String pathPaquetes) {
         paquetesPorCodigo = new HashMap<>();
         conAlimentos = new ArrayList<>();
@@ -35,14 +41,15 @@ public class Servicios {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento
+    // O(n) para devolver la lista sin romper encapsulamiento, si no seria O(1)
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos)
             return new ArrayList<>(this.conAlimentos);
         return new ArrayList<>(this.sinAlimentos);
     }
 
-    // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado o todos los nodos estan dentro del rango)
+    // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado o todos los
+    // nodos estan dentro del rango)
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
@@ -73,49 +80,46 @@ public class Servicios {
      * La poda reduce drásticamente los estados en la práctica (13 estados en el
      * ejemplo).
      */
+    private int mejorPesoFaltante;
+    private List<Camion> mejorSolucion;
+
     public List<Camion> backtracking() {
-        estadosGenerados = 0;
-        int pesoTotal = 0;
-        for (Paquete p : paquetes)
-            pesoTotal += p.getPeso();
-
-        mejorPesoNoAsignado = pesoTotal;
-        int[] mejorPesoArr = { pesoTotal };
-        List<Camion> mejorSolucion = new ArrayList<>();
-
-        backtrackingHelper(0, pesoTotal, mejorPesoArr, mejorSolucion);
-        mejorPesoNoAsignado = mejorPesoArr[0];
+        this.estadosGenerados = 0;
+        this.mejorSolucion = new ArrayList<>();
+        int pesoTotalPaquetes = 0;
+        for (Paquete p : paquetes) {
+            pesoTotalPaquetes += p.getPeso();
+        }
+        this.mejorPesoFaltante = pesoTotalPaquetes;
+        backtrackingHelper(0, 0);
         return mejorSolucion;
     }
 
-    private void backtrackingHelper(int indexPaquete, int pesoNoAsignado,
-            int[] mejorPesoNoAsignado, List<Camion> mejorSolucion) {
-        estadosGenerados++;
+    private void backtrackingHelper(int indexPaquete, int pesoDescartadoAcumulado) {
+        this.estadosGenerados++; 
+
+        if (pesoDescartadoAcumulado >= mejorPesoFaltante) {
+            return;
+        }
         if (indexPaquete == paquetes.size()) {
-            if (pesoNoAsignado < mejorPesoNoAsignado[0]) {
-                mejorPesoNoAsignado[0] = pesoNoAsignado;
-                mejorSolucion.clear();
-                mejorSolucion.addAll(copiarSolucion());
-            }
+            mejorPesoFaltante = pesoDescartadoAcumulado;
+            mejorSolucion = copiarSolucion();
             return;
         }
-        if (pesoNoAsignado > mejorPesoNoAsignado[0])
-            return;
-
         Paquete p = paquetes.get(indexPaquete);
-
         for (Camion c : camiones) {
-            if (p.isConAlimentos() && !c.isRefrigerado())
-                continue; // camion invalido para el paquete, salto al proximo
-            if (c.asignarPaquete(p)) {
-
-                backtrackingHelper(indexPaquete + 1, pesoNoAsignado - p.getPeso(),
-                        mejorPesoNoAsignado, mejorSolucion);
-                c.removerPaquete(p);
+            if (cumpleRestricciones(c, p)) {
+                if (c.asignarPaquete(p)) {
+                    backtrackingHelper(indexPaquete + 1, pesoDescartadoAcumulado);
+                    c.removerPaquete(p);
+                }
             }
         }
+        backtrackingHelper(indexPaquete + 1, pesoDescartadoAcumulado + p.getPeso());
+    }
 
-        backtrackingHelper(indexPaquete + 1, pesoNoAsignado, mejorPesoNoAsignado, mejorSolucion);
+    private boolean cumpleRestricciones(Camion c, Paquete p) {
+        return !p.isConAlimentos() || c.isRefrigerado();
     }
 
     /*

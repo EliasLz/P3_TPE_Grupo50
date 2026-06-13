@@ -13,7 +13,7 @@
             for (Camion c : solucionBT)
                 System.out.println("Camion " + c.getId() + " (" + c.getPatente() + "): " + c.getPaquetesAsignados());
             System.out.println("Peso no asignado: " + servicios.getMejorPesoNoAsignado() + " kg.");
-            System.out.println("Estados generados: " + servicios.estadosGenerados);
+            System.out.println("Estados generados: " + servicios.getEstadosGenerados());
 
         
             System.out.println("\n=== GREEDY ===");

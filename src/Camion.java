@@ -67,5 +67,8 @@ public class Camion {
     public int getCapacidadActual() {
         return capacidadActual;
     }
+    public int getCapacidadLibre(){
+        return this.getCapacidadMaxima()-this.getCapacidadActual();
+    }
 
 }
