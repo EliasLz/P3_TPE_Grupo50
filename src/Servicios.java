@@ -101,7 +101,8 @@ public class Servicios {
             Camion c = this.btsCamionesRefri.obtenerIgualGrandeMasCercano(new Camion(0, p.getPeso()), new Camion.CompararPorCapacidadActual());
             // Factible: Si existe un camion con la capacidad necesaria y cumple con los requerimientos de refrigeracion, se asigna
             if (c != null && this.requerimientoRefrigeracion(p, c)) {
-                c.asignarPaquete(p);
+                this.asignarPaquete(p,c);
+
             } else {
                 paquetesSinAsignar.add(p);
             }
@@ -116,13 +117,14 @@ public class Servicios {
                 //Asignamos al camimon que menos le falte para completar su capacidad
                 if (cnr.getCapacidadActual() <= cr.getCapacidadActual()) {
                     cnr.asignarPaquete(p);
+                    this.asignarPaquete(p,cnr);
                 } else {
-                    cr.asignarPaquete(p);
+                    this.asignarPaquete(p,cr);
                 }
             } else if (cnr != null) {
-                cnr.asignarPaquete(p);
+                this.asignarPaquete(p,cnr);
             } else if (cr != null) {
-                cr.asignarPaquete(p);
+                this.asignarPaquete(p,cr);
             } else {
                 paquetesSinAsignar.add(p);
             }
@@ -137,7 +139,17 @@ public class Servicios {
 
         return !p.contieneAlimentos() || c.esRefrigerado();
     }
-    
+
+    private void asignarPaquete(Paquete p, Camion c){
+        c.asignarPaquete(p);
+        if(c.esRefrigerado()){
+            this.btsCamionesRefri.remove(c);
+            this.btsCamionesRefri.add(c);
+        } else {
+            this.btsCamionesNoRefri.remove(c);
+            this.btsCamionesNoRefri.add(c);
+        }
+    }
 
     /*
     public resultadoAsignacion asignarBT(){
