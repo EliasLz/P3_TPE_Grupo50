@@ -15,10 +15,10 @@
 
         
             System.out.println("\n=== GREEDY ===");
-            List<Camion> solucionGreedy = servicios.greedy();
+            List<Camion> solucionGreedy = servicios.greedyConArboles();
             int pesoNoAsignadoGreedy = servicios.getPesoNoAsignadoGreedy();
             solucionGreedy.forEach(System.out::println);
             System.out.println("Peso no asignado: " + pesoNoAsignadoGreedy + " kg.");
-            System.out.println("Candidatos considerados: " + servicios.candidatosConsiderados);
+            System.out.println("Candidatos considerados: " + servicios.getCandidatosConsideradosGreedy());
         }
     }

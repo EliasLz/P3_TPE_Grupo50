@@ -16,6 +16,7 @@ public class Servicios {
     public int candidatosConsiderados = 0;
     private int estadosGenerados;
     private int pesoNoAsignadoGreedy;
+
     public int getEstadosGenerados() {
         return estadosGenerados;
     }
@@ -44,7 +45,8 @@ public class Servicios {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento (lo mismo aplicaria para los demas servicios),
+    // O(n) para devolver la lista sin romper encapsulamiento (lo mismo aplicaria
+    // para los demas servicios),
     // si no seria O(1).
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos)
@@ -100,7 +102,7 @@ public class Servicios {
     }
 
     private void backtrackingHelper(int indexPaquete, int pesoDescartadoAcumulado) {
-        this.estadosGenerados++; 
+        this.estadosGenerados++;
 
         if (pesoDescartadoAcumulado >= mejorPesoFaltante) {
             return;
@@ -133,42 +135,63 @@ public class Servicios {
      * con menor espacio disponible que aún pueda recibir el paquete actual,
      * aprovechando el espacio restante en camiones con mayor capacidad.
      * Complejidad: O(N log N + N*M) donde N=paquetes y M=camiones.
-     * si bien esta es una estrategia Greedy valida, no es la mas optima. 
-     * Se podria, por ejemplo, indicar los Camiones en ABB y que esten ordenados por su capacidad.
+     * si bien esta es una estrategia Greedy valida, no es la mas optima.
+     * Se podria, por ejemplo, indicar los Camiones en ABB y que esten ordenados por
+     * su capacidad.
      * De esta manera, en vez de usar un doble for como en esta solucion,
      * se buscaria por rangos y se obtendria una mejor complejidad computacional.
      *
      */
-    public List<Camion> greedy() {
+    public List<Camion> greedyConArboles() {
         candidatosConsiderados = 0;
         pesoNoAsignadoGreedy = 0;
+
+        CamionTree arbolNormales = new CamionTree();
+        CamionTree arbolRefrigerados = new CamionTree();
+
+        for (Camion c : camiones) {
+            if (c.isRefrigerado())
+                arbolRefrigerados.add(c);
+            else
+                arbolNormales.add(c);
+        }
 
         List<Paquete> paquetesOrdenados = new ArrayList<>(paquetes);
         paquetesOrdenados.sort((a, b) -> b.getPeso() - a.getPeso());
 
         for (Paquete p : paquetesOrdenados) {
-            Camion mejorCamion = null;
-            int menorEspacioDisponible = Integer.MAX_VALUE;
+            Camion mejorCamion;
 
-            for (Camion c : camiones) {
-
-                candidatosConsiderados++;
-                if (p.isConAlimentos() && !c.isRefrigerado())
-                    continue;
-                int espacioDisponible = c.getCapacidadMaxima() - c.getCapacidadActual();
-                if (espacioDisponible >= p.getPeso() && espacioDisponible < menorEspacioDisponible) {
-                    menorEspacioDisponible = espacioDisponible;
-                    mejorCamion = c;
-                }
+            if (p.isConAlimentos()) {
+                mejorCamion = arbolRefrigerados.buscarMejorAjuste(p.getPeso());
+            } else {
+                Camion candidatoNormal = arbolNormales.buscarMejorAjuste(p.getPeso());
+                Camion candidatoRefrigerado = arbolRefrigerados.buscarMejorAjuste(p.getPeso());
+                mejorCamion = elegirMenorEspacio(candidatoNormal, candidatoRefrigerado);
             }
 
-            if (mejorCamion != null)
+            if (mejorCamion != null) {
+                CamionTree arbolDestino = mejorCamion.isRefrigerado() ? arbolRefrigerados : arbolNormales;
+                arbolDestino.remove(mejorCamion);
                 mejorCamion.asignarPaquete(p);
-            else
+                arbolDestino.add(mejorCamion);
+            } else {
                 pesoNoAsignadoGreedy += p.getPeso();
+            }
         }
 
+        candidatosConsiderados = arbolNormales.getNodosVisitados() + arbolRefrigerados.getNodosVisitados();
         return camiones;
+    }
+
+    private Camion elegirMenorEspacio(Camion a, Camion b) {
+        if (a == null)
+            return b;
+        if (b == null)
+            return a;
+        int espacioA = a.getCapacidadMaxima() - a.getCapacidadActual();
+        int espacioB = b.getCapacidadMaxima() - b.getCapacidadActual();
+        return (espacioA <= espacioB) ? a : b;
     }
 
     private void cargarCamiones(String pathCamiones) {
@@ -234,5 +257,9 @@ public class Servicios {
         }
 
         return copia;
+    }
+
+    public int getCandidatosConsideradosGreedy() {
+        return candidatosConsiderados;
     }
 }
