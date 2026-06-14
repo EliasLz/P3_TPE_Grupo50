@@ -7,7 +7,7 @@ public class CamionTreeNode {
         this.camion = camion;
     }
 
-    public int getEspacioDisponible() {
+    public int getCapacidadLibre() {
         return camion.getCapacidadMaxima() - camion.getCapacidadActual();
     }
 

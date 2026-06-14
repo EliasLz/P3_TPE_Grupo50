@@ -131,16 +131,21 @@ public class Servicios {
     /*
      * Estrategia Greedy: se ordenan los paquetes de mayor a menor peso para asignar
      * primero los más difíciles de ubicar (mas pesados). Para cada paquete se
-     * selecciona el camión
-     * con menor espacio disponible que aún pueda recibir el paquete actual,
+     * selecciona el camión con menor espacio disponible que aún pueda recibir el
+     * paquete actual,
      * aprovechando el espacio restante en camiones con mayor capacidad.
-     * Complejidad: O(N log N + N*M) donde N=paquetes y M=camiones.
-     * si bien esta es una estrategia Greedy valida, no es la mas optima.
-     * Se podria, por ejemplo, indicar los Camiones en ABB y que esten ordenados por
-     * su capacidad.
-     * De esta manera, en vez de usar un doble for como en esta solucion,
-     * se buscaria por rangos y se obtendria una mejor complejidad computacional.
-     *
+     * En vez de recorrer linealmente todos los camiones (O(M)) para cada paquete,
+     * los camiones se organizan en arboles binarios de busqueda ordenados por su espacio
+     * disponible (capacidadMaxima - capacidadActual).
+     * Se usan dos ABB: uno para camiones refrigerados y otro para camiones
+     * normales, de manera que la restriccion de "paquete con alimentos -> camion refrigerado"
+     * se resuelve eligiendo directamente el arbol correcto, sin perder la complejidad logaritmica.
+     * Como la capacidad disponible de un camion cambia cada vez que recibe un
+     * paquete, una vez elegido el mejor camion se lo quita del arbol, se le
+     * asigna el paquete (lo que modifica su espacio disponible) y se lo vuelve
+     * a insertar en su nueva posicion correcta, conservando la propiedad de ABB.
+     * Complejidad: O(N log N) para ordenar los paquetes + O(M log M) para
+     * construir los arboles + O(N log M) para las busquedas/actualizaciones.
      */
     public List<Camion> greedyConArboles() {
         candidatosConsiderados = 0;
@@ -189,8 +194,8 @@ public class Servicios {
             return b;
         if (b == null)
             return a;
-        int espacioA = a.getCapacidadMaxima() - a.getCapacidadActual();
-        int espacioB = b.getCapacidadMaxima() - b.getCapacidadActual();
+        int espacioA = a.getCapacidadLibre();
+        int espacioB = b.getCapacidadLibre();
         return (espacioA <= espacioB) ? a : b;
     }
 

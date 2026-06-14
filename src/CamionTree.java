@@ -1,7 +1,7 @@
 public class CamionTree {
 
     private CamionTreeNode root;
-    private int nodosVisitados; // metrica equivalente a "candidatosConsiderados"
+    private int nodosVisitados;
 
     public int getNodosVisitados() { return nodosVisitados; }
 
@@ -12,9 +12,9 @@ public class CamionTree {
     private CamionTreeNode add(CamionTreeNode actual, Camion camion) {
         if (actual == null) return new CamionTreeNode(camion);
 
-        int espacioNuevo = camion.getCapacidadMaxima() - camion.getCapacidadActual();
+        int espacioNuevo = camion.getCapacidadLibre();
 
-        if (espacioNuevo < actual.getEspacioDisponible())
+        if (espacioNuevo < actual.getCapacidadLibre())
             actual.setLeft(add(actual.getLeft(), camion));
         else
             actual.setRight(add(actual.getRight(), camion));
@@ -31,7 +31,7 @@ public class CamionTree {
         if (actual == null) return null;
         nodosVisitados++;
 
-        if (actual.getEspacioDisponible() < peso) {
+        if (actual.getCapacidadLibre() < peso) {
             return buscarMejorAjuste(actual.getRight(), peso);
         } else {
             CamionTreeNode izquierda = buscarMejorAjuste(actual.getLeft(), peso);
@@ -47,7 +47,7 @@ public class CamionTree {
     private CamionTreeNode remove(CamionTreeNode actual, Camion camion, int espacio) {
         if (actual == null) return null;
 
-        int espacioActual = actual.getEspacioDisponible();
+        int espacioActual = actual.getCapacidadLibre();
 
         if (espacio < espacioActual) {
             actual.setLeft(remove(actual.getLeft(), camion, espacio));
@@ -60,7 +60,7 @@ public class CamionTree {
 
             CamionTreeNode sucesor = minimo(actual.getRight());
             Camion camionSucesor = sucesor.getCamion();
-            int espacioSucesor = sucesor.getEspacioDisponible();
+            int espacioSucesor = sucesor.getCapacidadLibre();
             actual.setCamion(camionSucesor);
             actual.setRight(remove(actual.getRight(), camionSucesor, espacioSucesor));
             return actual;
