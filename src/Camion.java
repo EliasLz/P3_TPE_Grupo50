@@ -70,5 +70,7 @@ public class Camion {
     public int getCapacidadLibre(){
         return this.getCapacidadMaxima()-this.getCapacidadActual();
     }
-
+    public String toString(){
+        return "Camion " + this.getId() + " (" + this.getPatente() + "): " + this.getPaquetesAsignados();
+    }
 }

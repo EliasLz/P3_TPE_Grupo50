@@ -13,12 +13,15 @@ public class Servicios {
     private Tree paquetesPorUrgencia;
     private List<Camion> camiones;
     private List<Paquete> paquetes;
-    private int mejorPesoNoAsignado;
     public int candidatosConsiderados = 0;
     private int estadosGenerados;
-
+    private int pesoNoAsignadoGreedy;
     public int getEstadosGenerados() {
         return estadosGenerados;
+    }
+
+    public int getPesoNoAsignadoGreedy() {
+        return pesoNoAsignadoGreedy;
     }
 
     /*
@@ -64,7 +67,7 @@ public class Servicios {
     }
 
     public int getMejorPesoNoAsignado() {
-        return mejorPesoNoAsignado;
+        return mejorPesoFaltante;
     }
 
     /*
@@ -138,6 +141,7 @@ public class Servicios {
      */
     public List<Camion> greedy() {
         candidatosConsiderados = 0;
+        pesoNoAsignadoGreedy = 0;
 
         List<Paquete> paquetesOrdenados = new ArrayList<>(paquetes);
         paquetesOrdenados.sort((a, b) -> b.getPeso() - a.getPeso());
@@ -160,6 +164,8 @@ public class Servicios {
 
             if (mejorCamion != null)
                 mejorCamion.asignarPaquete(p);
+            else
+                pesoNoAsignadoGreedy += p.getPeso();
         }
 
         return camiones;
