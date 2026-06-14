@@ -1,20 +1,18 @@
-public class TreeNode {
-    private int getClaveUrgencia;
-    private Paquete paquete;
-    private TreeNode left;
-    private TreeNode right;
+public class TreeNode<T extends Comparable<T>> {
+    private T valor;
+    private TreeNode<T> left;
+    private TreeNode<T> right;
 
-    public TreeNode(Paquete paquete) {
-        this.getClaveUrgencia = paquete.getUrgencia();
-        this.paquete = paquete;
+    public TreeNode(T valor) {
+        this.valor = valor;
         this.left = null;
         this.right = null;
     }
 
-    public int getClaveUrgencia() { return getClaveUrgencia; }
-    public Paquete getPaquete() { return paquete; }
-    public TreeNode getLeft() { return left; }
-    public TreeNode getRight() { return right; }
-    public void setLeft(TreeNode left) { this.left = left; }
-    public void setRight(TreeNode right) { this.right = right; }
+    public T getValor() { return this.valor; }
+    public TreeNode<T> getLeft() { return this.left; }
+    public TreeNode<T> getRight() { return this.right; }
+    public void setValor(T nuevoValor) { this.valor = nuevoValor; }
+    public void setLeft(TreeNode<T> left) { this.left = left; }
+    public void setRight(TreeNode<T> right) { this.right = right; }
 }

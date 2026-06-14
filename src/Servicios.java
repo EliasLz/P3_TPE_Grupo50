@@ -10,35 +10,38 @@ public class Servicios {
     private HashMap<String, Paquete> paquetesPorCodigo;
     private List<Paquete> conAlimentos;
     private List<Paquete> sinAlimentos;
-    private Tree paquetesPorUrgencia;
+    private Tree<Paquete> paquetesPorUrgencia;
     private List<Camion> camiones;
-    private List<Paquete> paquetes;
-    private int mejorPesoNoAsignado;
+    private Tree<Camion> btsCamionesRefri;
+    private Tree<Camion> btsCamionesNoRefri;
 
-    public int estadosGenerados = 0;
-    public int candidatosConsiderados = 0;
 
-    //ver
+    //ver al final
     //yo
     // Complejidad constructor: O(n²) si está completamente desbalanceado, O(n log n) si está balanceado.
-   //gero
+    //gero
     /* O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones N=Paquetes */
     public Servicios(String pathCamiones, String pathPaquetes) {
-        paquetesPorCodigo = new HashMap<>();
-        conAlimentos = new ArrayList<>();
-        sinAlimentos = new ArrayList<>();
-        paquetesPorUrgencia = new Tree();
-        camiones = new ArrayList<>();
-        paquetes = new ArrayList<>();
+        paquetesPorCodigo = new HashMap<>(); //para serv1
+        conAlimentos = new ArrayList<>();    //para serv2
+        sinAlimentos = new ArrayList<>();    //para serv2
+        paquetesPorUrgencia = new Tree<>();  //para serv3
+        camiones = new ArrayList<>();        //para parte2
+        btsCamionesRefri = new Tree<>();    //para parte2
+        btsCamionesNoRefri = new Tree<>();  //para parte2
         this.cargarCamiones(pathCamiones);
         this.cargarPaquetes(pathPaquetes);
+        this.conAlimentos.sort(new Paquete.CompararPorPesoInvertido());
+        this.sinAlimentos.sort(new Paquete.CompararPorPesoInvertido());
+
     }
 
     /**
      * Devuelve el paquete asociado a un código específico
-     * @implNote Complejidad: O(1) promedio, considerando posibles colisiones de hash
+     *
      * @param codigoPaquete Identificador único del paquete a buscar
      * @return El objeto Paquete correspondiente al código, o null si no lo encuentra
+     * @implNote Complejidad: O(1) promedio, considerando posibles colisiones de hash
      */
     public Paquete servicio1(String codigoPaquete) {
         return paquetesPorCodigo.get(codigoPaquete);
@@ -46,11 +49,12 @@ public class Servicios {
 
     /**
      * Devuelve una colección de paquetes filtrada por si tienen o no alimentos
-     * @implNote Complejidad: O(n), se crea y devuelve una copia
+     *
      * @param contieneAlimentos El tipo de colección solicitada
      *                          True: con alimentos
      *                          False: sin alimentos
      * @return Una nueva lista con los paquetes que cumplen la condición
+     * @implNote Complejidad: O(n), se crea y devuelve una copia
      */
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos) {
@@ -61,113 +65,110 @@ public class Servicios {
 
     /**
      * Devuelve una colección de peques según un rango de urgencia
-     * @implNote Complejidad: O(n), el rango puede abarcar todo el arbol
+     *
      * @param urgenciaMinima Límite inferior del rango
      * @param urgenciaMaxima Límite superior del rango
      * @return Colección de paquetes dentro del rango
+     * @implNote Complejidad: O(n), el rango puede abarcar todo el arbol
      */
     public List<Paquete> servicio3(int urgenciaMinima, int urgenciaMaxima) {
-        return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
+        // Se agregan valores id minimos y maximos para asegurarnos de que siempre pierdan el desempate al comparar,
+        // a fin de que busque en ambos hijos si el primer criterio (urgencia) da empate
+        return paquetesPorUrgencia.searchRange(new Paquete(Integer.MIN_VALUE, urgenciaMinima), new Paquete(Integer.MAX_VALUE, urgenciaMinima));
     }
 
-    /*
-     * Estrategia Backtracking: se explora el espacio de soluciones asignando cada
-     * paquete
-     * a algún camión disponible o dejándolo sin asignar. Para cada paquete se
-     * prueban
-     * todas las opciones válidas (respetando capacidad y refrigeración),
-     * actualizando
-     * la mejor solución cuando se minimiza el peso no asignado.
-     * Poda: si el pesoNoAsignado actual ya supera el mejor encontrado, se corta la
-     * rama.
-     * Complejidad: O((M+1)^N) peor caso, donde N=paquetes y M=camiones.
-     * La poda reduce drásticamente los estados en la práctica (13 estados en el
-     * ejemplo).
+    /**
+     *
+     * @return retornar peso total rechazado
+     * @implNote Metodo Greedy: Comportamiento
+     * para cada paquete de una lista de paquetes con alimento:
+     * → buscar en bstRefrigerados
+     * → asignar o acumular en lista de rechazados
+     * para cada paquete de una lista de paquetes sin alimento::
+     * → buscar en el bst de Camiones no refrigedaros y en el bst de los refrigerados
+     * → comparar y asignar al mejor resultado o acumular en lista de rechazados
+     * Complejidad: O(???)
      */
-    public List<Camion> backtracking() {
-        estadosGenerados = 0;
-        int pesoTotal = 0;
-        for (Paquete p : paquetes)
-            pesoTotal += p.getPeso();
+    public metricasAsignacion asignarGreedy() {
+        ArrayList<Paquete> paquetesSinAsignar = new ArrayList<>();
+        int contadorIterasionesPropiasDelMotodo = 0;
 
-        mejorPesoNoAsignado = pesoTotal;
-        int[] mejorPesoArr = { pesoTotal };
-        List<Camion> mejorSolucion = new ArrayList<>();
-
-        backtrackingHelper(0, pesoTotal, mejorPesoArr, mejorSolucion);
-        mejorPesoNoAsignado = mejorPesoArr[0];
-        return mejorSolucion;
-    }
-
-    private void backtrackingHelper(int indexPaquete, int pesoNoAsignado,
-            int[] mejorPesoNoAsignado, List<Camion> mejorSolucion) {
-        estadosGenerados++;
-        if (indexPaquete == paquetes.size()) {
-            if (pesoNoAsignado < mejorPesoNoAsignado[0]) {
-                mejorPesoNoAsignado[0] = pesoNoAsignado;
-                mejorSolucion.clear();
-                mejorSolucion.addAll(copiarSolucion());
+        //1. Asignamos paquetes con alimentos (ordenados de mayor a menor)
+        for (Paquete p : this.conAlimentos) {
+            // Seleccionar: Buscamos el camion que tenga una capacidadActual igual o la mayor más cercana a peso del paquete
+            // Se utiliza como referencia comparacion un Camion de capacidadActual igual al peso del paquete candidato,
+            // el valor id es indifirente, es solo para asegurar que cuando calcula la ruta de busqueda (compareTo) no pueda dar error
+            Camion c = this.btsCamionesRefri.obtenerIgualGrandeMasCercano(new Camion(0, p.getPeso()), new Camion.CompararPorCapacidadActual());
+            // Factible: Si existe un camion con la capacidad necesaria y cumple con los requerimientos de refrigeracion, se asigna
+            if (c != null && this.requerimientoRefrigeracion(p, c)) {
+                c.asignarPaquete(p);
+            } else {
+                paquetesSinAsignar.add(p);
             }
-            return;
-        }
-        if (pesoNoAsignado > mejorPesoNoAsignado[0])
-            return;
-
-        Paquete p = paquetes.get(indexPaquete);
-
-        for (Camion c : camiones) {
-            if (p.isConAlimentos() && !c.isRefrigerado())
-                continue; // camion invalido para el paquete, salto al proximo
-            if (c.asignarPaquete(p)) {
-
-                backtrackingHelper(indexPaquete + 1, pesoNoAsignado - p.getPeso(),
-                        mejorPesoNoAsignado, mejorSolucion);
-                c.removerPaquete(p);
-            }
+            contadorIterasionesPropiasDelMotodo++;
         }
 
-        backtrackingHelper(indexPaquete + 1, pesoNoAsignado, mejorPesoNoAsignado, mejorSolucion);
-    }
-
-    /*
-     * Estrategia Greedy: se ordenan los paquetes de mayor a menor peso para asignar
-     * primero los más difíciles de ubicar (mas pesados). Para cada paquete se
-     * selecciona el camión
-     * con menor espacio disponible que aún pueda recibir el paquete actual,
-     * aprovechando el espacio restante en camiones con mayor capacidad.
-     * Complejidad: O(N log N + N*M) donde N=paquetes y M=camiones.
-     */
-    public List<Camion> greedy() {
-        candidatosConsiderados = 0;
-
-        List<Paquete> paquetesOrdenados = new ArrayList<>(paquetes);
-        paquetesOrdenados.sort((a, b) -> b.getPeso() - a.getPeso());
-
-        for (Paquete p : paquetesOrdenados) {
-            Camion mejorCamion = null;
-            int menorEspacioDisponible = Integer.MAX_VALUE;
-
-            for (Camion c : camiones) {
-
-                candidatosConsiderados++;
-                if (p.isConAlimentos() && !c.isRefrigerado())
-                    continue;
-                int espacioDisponible = c.getCapacidadMaxima() - c.getCapacidadActual();
-                if (espacioDisponible >= p.getPeso() && espacioDisponible < menorEspacioDisponible) {
-                    menorEspacioDisponible = espacioDisponible;
-                    mejorCamion = c;
+        //2. Asignamos paquetes sin alimentos (ordenados de mayor a menor)
+        for (Paquete p : this.sinAlimentos) {
+            Camion cnr = this.btsCamionesNoRefri.obtenerIgualGrandeMasCercano(new Camion(0, p.getPeso()), new Camion.CompararPorCapacidadActual());
+            Camion cr = this.btsCamionesRefri.obtenerIgualGrandeMasCercano(new Camion(0, p.getPeso()), new Camion.CompararPorCapacidadActual());
+            if (cnr != null && cr != null) {
+                //Asignamos al camimon que menos le falte para completar su capacidad
+                if (cnr.getCapacidadActual() <= cr.getCapacidadActual()) {
+                    cnr.asignarPaquete(p);
+                } else {
+                    cr.asignarPaquete(p);
                 }
+            } else if (cnr != null) {
+                cnr.asignarPaquete(p);
+            } else if (cr != null) {
+                cr.asignarPaquete(p);
+            } else {
+                paquetesSinAsignar.add(p);
             }
-
-            if (mejorCamion != null)
-                mejorCamion.asignarPaquete(p);
+            contadorIterasionesPropiasDelMotodo++;
         }
+        return calcularMetricasAsignacion(paquetesSinAsignar, contadorIterasionesPropiasDelMotodo);
+    }
 
-        return camiones;
+    //Ver: está al pedo
+    // Es un poco innecesario, porque siempre se llama para asignar un Paquete con alimento. Pero por si acaso
+    private boolean requerimientoRefrigeracion(Paquete p, Camion c) {
+
+        return !p.contieneAlimentos() || c.esRefrigerado();
+    }
+    
+
+    /*
+    public resultadoAsignacion asignarBT(){
+
+    FALTA IMLEMENTAR EL BACKTACKING
+
+*/
+
+    public record metricasAsignacion(
+            List<Paquete> paquetesSinAsignar,
+            int pesoSinAsignar,
+            int cantSinAsignar,
+            int cantAsignados,
+            int cantIteracionesAsignador
+    ) {
+    }
+
+    private metricasAsignacion calcularMetricasAsignacion(List<Paquete> sinAsignar,
+                                                          int iteracionesAsignador) {
+        int pesoTotalSinAsignar = 0;
+        for (Paquete p : sinAsignar) {
+            pesoTotalSinAsignar += p.getPeso();
+        }
+        int cantAsignados = paquetesPorCodigo.size() - sinAsignar.size();
+        // La variable "iteracionesAsignador" solo indica las propias del metodo BT o Greedy a modo de referencia, NO LAS TOTALES
+        return new metricasAsignacion(sinAsignar, pesoTotalSinAsignar, sinAsignar.size(), cantAsignados, iteracionesAsignador);
     }
 
     /**
      * Carga camiones desde un archivo CSV
+     *
      * @param pathCamiones Ruta del archivo CSV
      */
     private void cargarCamiones(String pathCamiones) {
@@ -185,9 +186,13 @@ public class Servicios {
                 int id = Integer.parseInt(partes[0].trim());
                 String patente = partes[1].trim();
                 boolean refrigerado = partes[2].trim().equals("1");
-                int capacidadMaxima = Integer.parseInt(partes[3].trim());
-                Camion c = new Camion(id, patente, refrigerado, capacidadMaxima);
+                int capacidadActual = Integer.parseInt(partes[3].trim());
+                Camion c = new Camion(id, patente, refrigerado, capacidadActual);
                 camiones.add(c);
+                if (c.esRefrigerado())
+                    btsCamionesRefri.add(c);
+                else
+                    btsCamionesNoRefri.add(c);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -196,6 +201,7 @@ public class Servicios {
 
     /**
      * Carga Paquetes desde un archivo CSV
+     *
      * @param pathPaquetes Ruta del archivo CSV
      */
     private void cargarPaquetes(String pathPaquetes) {
@@ -216,7 +222,6 @@ public class Servicios {
                 boolean tieneAlimentos = partes[3].trim().equals("1");
                 int urgencia = Integer.parseInt(partes[4].trim());
                 Paquete p = new Paquete(id, codigo, peso, tieneAlimentos, urgencia);
-                paquetes.add(p);
                 paquetesPorCodigo.put(codigo, p);
                 paquetesPorUrgencia.add(p);
                 if (tieneAlimentos)
@@ -229,26 +234,13 @@ public class Servicios {
         }
     }
 
-    private List<Camion> copiarSolucion() {
-        List<Camion> copia = new ArrayList<>();
-
-        for (Camion c : camiones) {
-            copia.add(new Camion(c));
-        }
-
-        return copia;
-    }
-
     public List<Camion> getCamiones() {
         return camiones;
     }
 
-    public List<Paquete> getPaquetes() {
-        return paquetes;
+    public Iterable<Paquete> getPaquetes() {
+        return this.paquetesPorCodigo.values();
     }
 
-    public int getMejorPesoNoAsignado() {
-        return mejorPesoNoAsignado;
-    }
 
 }

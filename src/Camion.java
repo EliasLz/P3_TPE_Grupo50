@@ -1,30 +1,29 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
-public class Camion {
-    private int id;
-    private String patente;
-    private boolean refrigerado;
-    private int capacidadMaxima;
+public class Camion implements Comparable<Camion> {
+    private final int id;
+    private final String patente;
+    private final boolean refrigerado;
     private int capacidadActual;
     private List<Paquete> paquetesAsignados;
 
-    public Camion(int id, String patente, boolean refrigerado, int capacidadMaxima) {
+    public Camion(int id, String patente, boolean refrigerado, int capacidadActual) {
         this.id = id;
         this.patente = patente;
         this.refrigerado = refrigerado;
-        this.capacidadMaxima = capacidadMaxima;
-        this.capacidadActual = 0;
+        this.capacidadActual = capacidadActual;
         this.paquetesAsignados = new ArrayList<>();
     }
 
-    public Camion(Camion otro) {
-        this.id = otro.id;
-        this.patente = otro.patente;
-        this.refrigerado = otro.refrigerado;
-        this.capacidadMaxima = otro.capacidadMaxima;
-        this.capacidadActual = otro.capacidadActual;
-        this.paquetesAsignados = new ArrayList<>(otro.paquetesAsignados);
+    public Camion(int id, int capacidadActual) {
+        this.id = id;
+        this.patente = null;
+        this.refrigerado = false;
+        this.capacidadActual = capacidadActual;
+        this.paquetesAsignados = new ArrayList<>();
     }
 
     public int getId() {
@@ -35,12 +34,8 @@ public class Camion {
         return patente;
     }
 
-    public boolean isRefrigerado() {
+    public boolean esRefrigerado() {
         return refrigerado;
-    }
-
-    public int getCapacidadMaxima() {
-        return capacidadMaxima;
     }
 
     public List<Paquete> getPaquetesAsignados() {
@@ -48,24 +43,52 @@ public class Camion {
     }
 
     public boolean asignarPaquete(Paquete paquete) {
-        if (capacidadActual + paquete.getPeso() > capacidadMaxima) {
+        if (this.capacidadActual < paquete.getPeso()) {
             return false;
         }
         paquetesAsignados.add(paquete);
-        capacidadActual += paquete.getPeso();
+        this.capacidadActual -= paquete.getPeso();
         return true;
-    }
-
-    public void removerPaquete(Paquete paquete) {
-        paquetesAsignados.remove(paquete); /*
-                                            * podria mejorarse ya que arraylist
-                                            * recorre todos los paquetes para borrar O(n)
-                                            */
-        capacidadActual -= paquete.getPeso();
     }
 
     public int getCapacidadActual() {
         return capacidadActual;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this==o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Camion otroCamion = (Camion) o;
+        return id == otroCamion.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public int compareTo(Camion otroCamion){
+        if(otroCamion== null){
+            throw new NullPointerException("Estás pasando un parametro nulo");
+        }
+        int resultado = Integer.compare(this.capacidadActual, otroCamion.getCapacidadActual());
+        if(resultado==0){
+            resultado=Integer.compare(this.id, otroCamion.getId());
+        }
+        return resultado;
+    }
+
+    public static class CompararPorCapacidadActual implements Comparator<Camion> {
+        @Override
+        public int compare(Camion c1, Camion c2) {
+            if(c1 == null || c2 == null){
+               throw new NullPointerException("Estás pasando un parametro nulo");
+            }
+            return Integer.compare(c1.getCapacidadActual(), c2.getCapacidadActual());
+        }
+    }
+
 
 }
