@@ -129,6 +129,11 @@ public class Servicios {
      * con menor espacio disponible que aún pueda recibir el paquete actual,
      * aprovechando el espacio restante en camiones con mayor capacidad.
      * Complejidad: O(N log N + N*M) donde N=paquetes y M=camiones.
+     * si bien esta es una estrategia Greedy valida, no es la mas optima. 
+     * Se podria, por ejemplo, indicar los Camiones en ABB y que esten ordenados por su capacidad.
+     * De esta manera, en vez de usar un doble for como en esta solucion,
+     * se buscaria por rangos y se obtendria una mejor complejidad computacional.
+     *
      */
     public List<Camion> greedy() {
         candidatosConsiderados = 0;
