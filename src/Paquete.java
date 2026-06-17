@@ -57,17 +57,6 @@ public class Paquete implements Comparable<Paquete> {
     }
 
     @Override
-    public String toString() {
-        return "Paquete{" +
-                "id=" + this.id +
-                ", codigo='" + this.codigoPaquete + '\'' +
-                ", peso=" + this.peso +
-                ", urgencia=" + this.urgencia +
-                ", contiene alimentos=" + this.conAlimentos +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this==o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -93,6 +82,16 @@ public class Paquete implements Comparable<Paquete> {
         return resultado;
     }
 
+    @Override
+    public String toString() {
+        return "Paquete{" +
+                "id=" + this.id +
+                ", peso=" + this.peso +
+                ", urgencia=" + this.urgencia +
+                ", contiene alimentos=" + this.conAlimentos +
+                '}';
+    }
+
     // Creamos una clase comparadora de Paquete para poder ordenarlos de mayor a menor, invirtiendo parametos
     public static class CompararPorPesoInvertido implements Comparator<Paquete> {
 
@@ -104,4 +103,7 @@ public class Paquete implements Comparable<Paquete> {
             return Integer.compare(p2.getPeso(), p1.getPeso());
         }
     }
+
+
+
 }

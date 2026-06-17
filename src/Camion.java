@@ -8,7 +8,7 @@ public class Camion implements Comparable<Camion> {
     private final String patente;
     private final boolean refrigerado;
     private int capacidadActual;
-    private List<Paquete> paquetesAsignados;
+    private final List<Paquete> paquetesAsignados;
 
     public Camion(int id, String patente, boolean refrigerado, int capacidadActual) {
         this.id = id;
@@ -46,7 +46,7 @@ public class Camion implements Comparable<Camion> {
         if (this.capacidadActual < paquete.getPeso()) {
             return false;
         }
-        paquetesAsignados.add(paquete);
+        this.paquetesAsignados.add(paquete);
         this.capacidadActual -= paquete.getPeso();
         return true;
     }
@@ -68,6 +68,7 @@ public class Camion implements Comparable<Camion> {
         return Objects.hash(this.id);
     }
 
+    // Los camiones tienen criterio de desempate para que el Tree distinga camiones del mismo peso
     @Override
     public int compareTo(Camion otroCamion){
         if(otroCamion== null){
@@ -90,5 +91,18 @@ public class Camion implements Comparable<Camion> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Camion{" +
+                "id=" + this.id +
+                ", capacidadActual=" + this.capacidadActual +
+                ", es refri=" + this.refrigerado +
+                ", paquetes asignados=" + this.paquetesAsignados.size() +
+                '}';
+    }
+
+    public void setCapacidadActual(int capacidadActual) {
+        this.capacidadActual = capacidadActual;
+    }
 
 }

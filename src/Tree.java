@@ -7,12 +7,23 @@ public class Tree<T extends Comparable<T>> {
 
     private TreeNode<T> root;
     private int cantElementos;
+    private int cantPasosUltimoAdd;
+    private int cantPasosUltimoRemove;
+    private int cantPasosUltimoGrandeMasCercano;
 
     public Tree() {
         this.root = null;
     }
 
+    /**
+     * Agrega elementos a la estructura, no admite repetidos.
+     * Ordena según el comparador de su tipo genérico
+
+     * @param elemento valor a agregar, es clave y valor al mismo tiempo
+     * @implNote Complejidad: O(log n)
+     */
     public void add(T elemento) {
+        this.cantPasosUltimoAdd = 0;
         if (this.root == null) {
             this.root = new TreeNode<T>(elemento);
         } else {
@@ -22,6 +33,7 @@ public class Tree<T extends Comparable<T>> {
     }
 
     private void add(TreeNode<T> nodoActual, T elemento) {
+        this.cantPasosUltimoAdd++;
         int comparacion = elemento.compareTo(nodoActual.getValor());
         if (comparacion < 0) {
             if (nodoActual.getLeft() == null)
@@ -74,7 +86,15 @@ public class Tree<T extends Comparable<T>> {
         }
     }
 
+    /**
+     * Quita el valor parametro de la estructura,
+     * imprime mensaje si no se realizo cambios
+
+     * @param elemento valor a quitar, es clave y valor al mismo tiempo
+     * @implNote Complejidad: O(log n)
+     */
     public void remove(T elemento) {
+        this.cantPasosUltimoRemove = 0;
         if (elemento == null || this.root == null) {
             System.out.println("No se puede eliminar, árbol vacío o parametro invalido");
             return;
@@ -92,7 +112,7 @@ public class Tree<T extends Comparable<T>> {
         if (nodoActual == null) {
             return null;
         }
-
+        cantPasosUltimoRemove++;
         // 1. Es distinto: se decide lado recorrido
         if (elemento.compareTo(nodoActual.getValor()) < 0) {
             nodoActual.setLeft(removeRecursivo(nodoActual.getLeft(), elemento, encontrado));
@@ -130,6 +150,7 @@ public class Tree<T extends Comparable<T>> {
     // Busca el más descendiente más a la izquierda
     private TreeNode<T> obtenerMasChico(TreeNode<T> actual) {
         while (actual.getLeft() != null) {
+            cantPasosUltimoRemove++;
             actual = actual.getLeft();
         }
         return actual;
@@ -140,8 +161,10 @@ public class Tree<T extends Comparable<T>> {
      *
      * @param referencia Objeto ficticio que contiene el valor que queremos ajustar (ej Camion: CapacidadActual 500, ID 20)
      * @return El elemento del árbol igual o el mayor más cercano al valor de referencia, null si no hay ninguno que sea mayor/igual.
+     * @implNote Complejidad: O(log n)
      */
     public T obtenerIgualGrandeMasCercano(T referencia, Comparator<T> comparadorSinDesempate) {
+        this.cantPasosUltimoGrandeMasCercano = 0;
         return obtenerIgualGrandeMasCercano(this.root, referencia, null, comparadorSinDesempate);
     }
 
@@ -149,6 +172,8 @@ public class Tree<T extends Comparable<T>> {
         if (nodoActual == null) {
             return mejorCandidato;
         }
+        cantPasosUltimoGrandeMasCercano++;
+
         // FASE 1: Verificamos si es candidato
         int comparacion = comparadorSinDesempate.compare(nodoActual.getValor(), referencia);
 
@@ -168,10 +193,43 @@ public class Tree<T extends Comparable<T>> {
         // Comparamos nuevamente utilizando el mismo comparador que utiliza el add del árbol
         int comparacionNativa = nodoActual.getValor().compareTo(referencia);
 
-        if (comparacionNativa > 0) {
+        if (comparacionNativa >= 0) {
             return obtenerIgualGrandeMasCercano(nodoActual.getLeft(), referencia, mejorCandidato, comparadorSinDesempate);
         } else {
             return obtenerIgualGrandeMasCercano(nodoActual.getRight(), referencia, mejorCandidato, comparadorSinDesempate);
+        }
+    }
+
+    public int getCantPasosUltimoAdd() {
+        return cantPasosUltimoAdd;
+    }
+
+    public int getCantPasosUltimoRemove() {
+        return cantPasosUltimoRemove;
+    }
+
+    public int getCantPasosUltimoGrandeMasCercano() {
+        return cantPasosUltimoGrandeMasCercano;
+    }
+
+    @Override
+    public String toString() {
+        return "Tree{" +
+                "cantElementos=" + cantElementos +
+                '}';
+    }
+
+    public List<T> getElementosPreorder() {
+        List<T> resultado = new ArrayList<>();
+        getElementosPreorder(root, resultado);
+        return resultado;
+    }
+
+    private void getElementosPreorder(TreeNode<T> nodo, List<T> acumulador) {
+        if (nodo != null) {
+            acumulador.add(nodo.getValor());
+            getElementosPreorder(nodo.getLeft(), acumulador);
+            getElementosPreorder(nodo.getRight(), acumulador);
         }
     }
 
