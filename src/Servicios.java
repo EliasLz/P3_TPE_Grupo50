@@ -69,63 +69,61 @@ public class Servicios {
     }
 
     public int getMejorPesoNoAsignado() {
-        return mejorPesoFaltante;
+        return mejorPesoNoAsignado;
     }
 
     /*
      * Estrategia Backtracking: se explora el espacio de soluciones asignando cada
-     * paquete
-     * a algún camión disponible o dejándolo sin asignar. Para cada paquete se
-     * prueban
-     * todas las opciones válidas (respetando capacidad y refrigeración),
-     * actualizando
-     * la mejor solución cuando se minimiza el peso no asignado.
+     * paquete a algún camión disponible o dejándolo sin asignar. Para cada paquete
+     * se
+     * prueban todas las opciones válidas (respetando capacidad y refrigeración),
+     * actualizando la mejor solución cuando se minimiza el peso no asignado.
      * Poda: si el pesoNoAsignado actual ya supera el mejor encontrado, se corta la
      * rama.
      * Complejidad: O((M+1)^N) peor caso, donde N=paquetes y M=camiones.
      * La poda reduce drásticamente los estados en la práctica (13 estados en el
      * ejemplo).
      */
-    private int mejorPesoFaltante;
+    private int mejorPesoNoAsignado;
     private List<Camion> mejorSolucion;
 
     public List<Camion> backtracking() {
         this.estadosGenerados = 0;
         this.mejorSolucion = new ArrayList<>();
         int pesoTotalPaquetes = 0;
-        for (Paquete p : paquetes) {
-            pesoTotalPaquetes += p.getPeso();
+        for (Paquete paquete : paquetes) {
+            pesoTotalPaquetes += paquete.getPeso();
         }
-        this.mejorPesoFaltante = pesoTotalPaquetes;
-        backtrackingHelper(0, 0);
+        this.mejorPesoNoAsignado = pesoTotalPaquetes;
+        asignarPaquetesRecursivo(0, 0);
         return mejorSolucion;
     }
 
-    private void backtrackingHelper(int indexPaquete, int pesoDescartadoAcumulado) {
+    private void asignarPaquetesRecursivo(int indicePaqueteActual, int pesoNoAsignadoAcumulado) {
         this.estadosGenerados++;
 
-        if (pesoDescartadoAcumulado >= mejorPesoFaltante) {
+        if (pesoNoAsignadoAcumulado >= mejorPesoNoAsignado) {
             return;
         }
-        if (indexPaquete == paquetes.size()) {
-            mejorPesoFaltante = pesoDescartadoAcumulado;
+        if (indicePaqueteActual == paquetes.size()) {
+            mejorPesoNoAsignado = pesoNoAsignadoAcumulado;
             mejorSolucion = copiarSolucion();
             return;
         }
-        Paquete p = paquetes.get(indexPaquete);
-        for (Camion c : camiones) {
-            if (cumpleRestricciones(c, p)) {
-                if (c.asignarPaquete(p)) {
-                    backtrackingHelper(indexPaquete + 1, pesoDescartadoAcumulado);
-                    c.removerPaquete(p);
+        Paquete paqueteActual = paquetes.get(indicePaqueteActual);
+        for (Camion camion : camiones) {
+            if (puedeAsignarsePorRefrigeracion(camion, paqueteActual)) {
+                if (camion.asignarPaquete(paqueteActual)) {
+                    asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
+                    camion.removerPaquete(paqueteActual);
                 }
             }
         }
-        backtrackingHelper(indexPaquete + 1, pesoDescartadoAcumulado + p.getPeso());
+        asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado + paqueteActual.getPeso());
     }
 
-    private boolean cumpleRestricciones(Camion c, Paquete p) {
-        return !p.isConAlimentos() || c.isRefrigerado();
+    private boolean puedeAsignarsePorRefrigeracion(Camion camion, Paquete paquete) {
+        return !paquete.isConAlimentos() || camion.isRefrigerado();
     }
 
     /*
@@ -135,11 +133,14 @@ public class Servicios {
      * paquete actual,
      * aprovechando el espacio restante en camiones con mayor capacidad.
      * En vez de recorrer linealmente todos los camiones (O(M)) para cada paquete,
-     * los camiones se organizan en arboles binarios de busqueda ordenados por su espacio
+     * los camiones se organizan en arboles binarios de busqueda ordenados por su
+     * espacio
      * disponible (capacidadMaxima - capacidadActual).
      * Se usan dos ABB: uno para camiones refrigerados y otro para camiones
-     * normales, de manera que la restriccion de "paquete con alimentos -> camion refrigerado"
-     * se resuelve eligiendo directamente el arbol correcto, sin perder la complejidad logaritmica.
+     * normales, de manera que la restriccion de
+     * "paquete con alimentos -> camion refrigerado"
+     * se resuelve eligiendo directamente el arbol correcto, sin perder la
+     * complejidad logaritmica.
      * Como la capacidad disponible de un camion cambia cada vez que recibe un
      * paquete, una vez elegido el mejor camion se lo quita del arbol, se le
      * asigna el paquete (lo que modifica su espacio disponible) y se lo vuelve
