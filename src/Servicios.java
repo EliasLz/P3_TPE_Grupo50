@@ -13,7 +13,7 @@ public class Servicios {
     private Tree paquetesPorUrgencia;
     private List<Camion> camiones;
     private List<Paquete> paquetes;
-    public int candidatosConsiderados = 0;
+    private int candidatosConsiderados = 0;
     private int estadosGenerados;
     private int pesoNoAsignadoGreedy;
 

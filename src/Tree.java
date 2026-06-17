@@ -47,9 +47,9 @@ public class Tree {
         if (urgenciaActual >= min && urgenciaActual <= max) {
             result.add(n.getPaquete());
         }
-        if (urgenciaActual < max) {
-            searchRange(n.getRight(), min, max, result);
-        }
+        if (urgenciaActual <= max) {
+        searchRange(n.getRight(), min, max, result);
+    }
     }
 
 }
