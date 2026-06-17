@@ -9,7 +9,7 @@
         
             System.out.println("=== BACKTRACKING ===");
             List<Camion> solucionBT = servicios.backtracking();
-             solucionBT.forEach(System.out::println);
+            solucionBT.forEach(System.out::println);
             System.out.println("Peso no asignado: " + servicios.getMejorPesoNoAsignado() + " kg.");
             System.out.println("Estados generados: " + servicios.getEstadosGenerados());
 
@@ -20,5 +20,6 @@
             solucionGreedy.forEach(System.out::println);
             System.out.println("Peso no asignado: " + pesoNoAsignadoGreedy + " kg.");
             System.out.println("Candidatos considerados: " + servicios.getCandidatosConsideradosGreedy());
+            
         }
     }

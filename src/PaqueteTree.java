@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tree {
+public class PaqueteTree {
 
     private TreeNode root;
 
-    public Tree() {
+    public PaqueteTree() {
         this.root = null;
     }
 

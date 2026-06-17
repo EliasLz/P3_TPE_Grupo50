@@ -57,10 +57,7 @@ public class Camion {
     }
 
     public void removerPaquete(Paquete paquete) {
-        paquetesAsignados.remove(paquete); /*
-                                            * podria mejorarse ya que arraylist
-                                            * recorre todos los paquetes para borrar O(n)
-                                            */
+        paquetesAsignados.remove(paquete);
         capacidadActual -= paquete.getPeso();
     }
 

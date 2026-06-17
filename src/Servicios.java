@@ -10,7 +10,7 @@ public class Servicios {
     private HashMap<String, Paquete> paquetesPorCodigo;
     private List<Paquete> conAlimentos;
     private List<Paquete> sinAlimentos;
-    private Tree paquetesPorUrgencia;
+    private PaqueteTree paquetesPorUrgencia;
     private List<Camion> camiones;
     private List<Paquete> paquetes;
     private int candidatosConsiderados = 0;
@@ -33,7 +33,7 @@ public class Servicios {
         paquetesPorCodigo = new HashMap<>();
         conAlimentos = new ArrayList<>();
         sinAlimentos = new ArrayList<>();
-        paquetesPorUrgencia = new Tree();
+        paquetesPorUrgencia = new PaqueteTree();
         camiones = new ArrayList<>();
         paquetes = new ArrayList<>();
         this.cargarCamiones(pathCamiones);
