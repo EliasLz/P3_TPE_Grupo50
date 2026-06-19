@@ -64,10 +64,12 @@ public class Camion {
     public int getCapacidadActual() {
         return capacidadActual;
     }
-    public int getCapacidadLibre(){
-        return this.getCapacidadMaxima()-this.getCapacidadActual();
+
+    public int getCapacidadLibre() {
+        return this.getCapacidadMaxima() - this.getCapacidadActual();
     }
-    public String toString(){
+
+    public String toString() {
         return "Camion " + this.getId() + " (" + this.getPatente() + "): " + this.getPaquetesAsignados();
     }
 }

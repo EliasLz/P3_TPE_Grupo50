@@ -11,10 +11,27 @@ public class CamionTreeNode {
         return camion.getCapacidadMaxima() - camion.getCapacidadActual();
     }
 
-    public Camion getCamion() { return camion; }
-    public void setCamion(Camion camion) { this.camion = camion; }
-    public CamionTreeNode getLeft() { return left; }
-    public void setLeft(CamionTreeNode left) { this.left = left; }
-    public CamionTreeNode getRight() { return right; }
-    public void setRight(CamionTreeNode right) { this.right = right; }
+    public Camion getCamion() {
+        return camion;
+    }
+
+    public void setCamion(Camion camion) {
+        this.camion = camion;
+    }
+
+    public CamionTreeNode getLeft() {
+        return left;
+    }
+
+    public void setLeft(CamionTreeNode left) {
+        this.left = left;
+    }
+
+    public CamionTreeNode getRight() {
+        return right;
+    }
+
+    public void setRight(CamionTreeNode right) {
+        this.right = right;
+    }
 }

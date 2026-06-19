@@ -1,5 +1,4 @@
 
-
 public class Paquete {
     private final int id;
     private final String codigoPaquete;

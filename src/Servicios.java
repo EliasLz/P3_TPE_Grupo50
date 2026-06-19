@@ -52,7 +52,6 @@ public class Servicios {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
 
-  
     /*
      * Estrategia Backtracking: se explora el espacio de soluciones asignando cada
      * paquete a algún camión disponible o dejándolo sin asignar. Para cada paquete
@@ -93,7 +92,7 @@ public class Servicios {
         for (Camion camion : camiones) {
             if (puedeAsignarsePorRefrigeracion(camion, paqueteActual)) {
                 if (camion.asignarPaquete(paqueteActual)) {
-                    if (pesoNoAsignadoAcumulado < mejorPesoNoAsignado) { 
+                    if (pesoNoAsignadoAcumulado < mejorPesoNoAsignado) {
                         asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
                     }
                     camion.removerPaquete(paqueteActual);
@@ -102,7 +101,7 @@ public class Servicios {
         }
 
         int pesoSiNoAsignado = pesoNoAsignadoAcumulado + paqueteActual.getPeso();
-        if (pesoSiNoAsignado < mejorPesoNoAsignado) { 
+        if (pesoSiNoAsignado < mejorPesoNoAsignado) {
             asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoSiNoAsignado);
         }
     }
@@ -253,14 +252,16 @@ public class Servicios {
     public int getCandidatosConsideradosGreedy() {
         return candidatosConsiderados;
     }
-       public int getEstadosGenerados() {
+
+    public int getEstadosGenerados() {
         return estadosGenerados;
     }
 
     public int getPesoNoAsignadoGreedy() {
         return pesoNoAsignadoGreedy;
     }
-      public List<Camion> getCamiones() {
+
+    public List<Camion> getCamiones() {
         return camiones;
     }
 

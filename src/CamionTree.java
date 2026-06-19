@@ -3,14 +3,17 @@ public class CamionTree {
     private CamionTreeNode root;
     private int nodosVisitados;
 
-    public int getNodosVisitados() { return nodosVisitados; }
+    public int getNodosVisitados() {
+        return nodosVisitados;
+    }
 
     public void add(Camion camion) {
         root = add(root, camion);
     }
 
     private CamionTreeNode add(CamionTreeNode actual, Camion camion) {
-        if (actual == null) return new CamionTreeNode(camion);
+        if (actual == null)
+            return new CamionTreeNode(camion);
 
         int espacioNuevo = camion.getCapacidadLibre();
 
@@ -28,7 +31,8 @@ public class CamionTree {
     }
 
     private CamionTreeNode buscarMejorAjuste(CamionTreeNode actual, int peso) {
-        if (actual == null) return null;
+        if (actual == null)
+            return null;
         nodosVisitados++;
 
         if (actual.getCapacidadLibre() < peso) {
@@ -45,7 +49,8 @@ public class CamionTree {
     }
 
     private CamionTreeNode remove(CamionTreeNode actual, Camion camion, int espacio) {
-        if (actual == null) return null;
+        if (actual == null)
+            return null;
 
         int espacioActual = actual.getCapacidadLibre();
 
@@ -55,8 +60,10 @@ public class CamionTree {
         }
 
         if (espacio == espacioActual && actual.getCamion() == camion) {
-            if (actual.getLeft() == null) return actual.getRight();
-            if (actual.getRight() == null) return actual.getLeft();
+            if (actual.getLeft() == null)
+                return actual.getRight();
+            if (actual.getRight() == null)
+                return actual.getLeft();
 
             CamionTreeNode sucesor = minimo(actual.getRight());
             Camion camionSucesor = sucesor.getCamion();
@@ -72,7 +79,8 @@ public class CamionTree {
     }
 
     private CamionTreeNode minimo(CamionTreeNode n) {
-        while (n.getLeft() != null) n = n.getLeft();
+        while (n.getLeft() != null)
+            n = n.getLeft();
         return n;
     }
 }

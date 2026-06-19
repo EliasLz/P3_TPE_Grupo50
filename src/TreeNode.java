@@ -11,10 +11,27 @@ public class TreeNode {
         this.right = null;
     }
 
-    public int getUrgencia() { return urgencia; }
-    public Paquete getPaquete() { return paquete; }
-    public TreeNode getLeft() { return left; }
-    public TreeNode getRight() { return right; }
-    public void setLeft(TreeNode left) { this.left = left; }
-    public void setRight(TreeNode right) { this.right = right; }
+    public int getUrgencia() {
+        return urgencia;
+    }
+
+    public Paquete getPaquete() {
+        return paquete;
+    }
+
+    public TreeNode getLeft() {
+        return left;
+    }
+
+    public TreeNode getRight() {
+        return right;
+    }
+
+    public void setLeft(TreeNode left) {
+        this.left = left;
+    }
+
+    public void setRight(TreeNode right) {
+        this.right = right;
+    }
 }
