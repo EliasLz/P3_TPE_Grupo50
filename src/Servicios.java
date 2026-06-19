@@ -37,11 +37,11 @@ public class Servicios {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento
+    // O(1) 
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos)
-            return new ArrayList<>(this.conAlimentos);
-        return new ArrayList<>(this.sinAlimentos);
+            return this.conAlimentos;
+        return this.sinAlimentos;
     }
 
     // O(log n + k) caso promedio. O(N) peor caso (arbol desbalanceado o todos los
