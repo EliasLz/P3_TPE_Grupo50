@@ -37,7 +37,7 @@ public class Servicios {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento 
+    // O(n) para devolver la lista sin romper encapsulamiento
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos)
             return new ArrayList<>(this.conAlimentos);
@@ -88,11 +88,11 @@ public class Servicios {
 
         Paquete paqueteActual = paquetes.get(indicePaqueteActual);
         for (Camion camion : camiones) {
+            if (pesoNoAsignadoAcumulado >= mejorPesoNoAsignado)
+                break; 
             if (puedeAsignarsePorRefrigeracion(camion, paqueteActual)) {
                 if (camion.asignarPaquete(paqueteActual)) {
-                    if (pesoNoAsignadoAcumulado < mejorPesoNoAsignado) {
-                        asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
-                    }
+                    asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
                     camion.removerPaquete(paqueteActual);
                 }
             }
