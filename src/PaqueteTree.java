@@ -48,8 +48,8 @@ public class PaqueteTree {
             result.add(n.getPaquete());
         }
         if (urgenciaActual <= max) {
-        searchRange(n.getRight(), min, max, result);
-    }
+            searchRange(n.getRight(), min, max, result);
+        }
     }
 
 }

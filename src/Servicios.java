@@ -17,14 +17,6 @@ public class Servicios {
     private int estadosGenerados;
     private int pesoNoAsignadoGreedy;
 
-    public int getEstadosGenerados() {
-        return estadosGenerados;
-    }
-
-    public int getPesoNoAsignadoGreedy() {
-        return pesoNoAsignadoGreedy;
-    }
-
     /*
      * O(M + N log N) caso promedio, O(M + N^2) peor caso. donde M=camiones
      * N=Paquetes
@@ -60,18 +52,7 @@ public class Servicios {
         return paquetesPorUrgencia.searchRange(urgenciaMinima, urgenciaMaxima);
     }
 
-    public List<Camion> getCamiones() {
-        return camiones;
-    }
-
-    public List<Paquete> getPaquetes() {
-        return paquetes;
-    }
-
-    public int getMejorPesoNoAsignado() {
-        return mejorPesoNoAsignado;
-    }
-
+  
     /*
      * Estrategia Backtracking: se explora el espacio de soluciones asignando cada
      * paquete a algún camión disponible o dejándolo sin asignar. Para cada paquete
@@ -81,8 +62,6 @@ public class Servicios {
      * Poda: si el pesoNoAsignado actual ya supera el mejor encontrado, se corta la
      * rama.
      * Complejidad: O((M+1)^N) peor caso, donde N=paquetes y M=camiones.
-     * La poda reduce drásticamente los estados en la práctica (13 estados en el
-     * ejemplo).
      */
     private int mejorPesoNoAsignado;
     private List<Camion> mejorSolucion;
@@ -102,24 +81,30 @@ public class Servicios {
     private void asignarPaquetesRecursivo(int indicePaqueteActual, int pesoNoAsignadoAcumulado) {
         this.estadosGenerados++;
 
-        if (pesoNoAsignadoAcumulado >= mejorPesoNoAsignado) {
-            return;
-        }
         if (indicePaqueteActual == paquetes.size()) {
-            mejorPesoNoAsignado = pesoNoAsignadoAcumulado;
-            mejorSolucion = copiarSolucion();
+            if (pesoNoAsignadoAcumulado < mejorPesoNoAsignado) {
+                mejorPesoNoAsignado = pesoNoAsignadoAcumulado;
+                mejorSolucion = copiarSolucion();
+            }
             return;
         }
+
         Paquete paqueteActual = paquetes.get(indicePaqueteActual);
         for (Camion camion : camiones) {
             if (puedeAsignarsePorRefrigeracion(camion, paqueteActual)) {
                 if (camion.asignarPaquete(paqueteActual)) {
-                    asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
+                    if (pesoNoAsignadoAcumulado < mejorPesoNoAsignado) { 
+                        asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado);
+                    }
                     camion.removerPaquete(paqueteActual);
                 }
             }
         }
-        asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoNoAsignadoAcumulado + paqueteActual.getPeso());
+
+        int pesoSiNoAsignado = pesoNoAsignadoAcumulado + paqueteActual.getPeso();
+        if (pesoSiNoAsignado < mejorPesoNoAsignado) { 
+            asignarPaquetesRecursivo(indicePaqueteActual + 1, pesoSiNoAsignado);
+        }
     }
 
     private boolean puedeAsignarsePorRefrigeracion(Camion camion, Paquete paquete) {
@@ -268,4 +253,23 @@ public class Servicios {
     public int getCandidatosConsideradosGreedy() {
         return candidatosConsiderados;
     }
+       public int getEstadosGenerados() {
+        return estadosGenerados;
+    }
+
+    public int getPesoNoAsignadoGreedy() {
+        return pesoNoAsignadoGreedy;
+    }
+      public List<Camion> getCamiones() {
+        return camiones;
+    }
+
+    public List<Paquete> getPaquetes() {
+        return paquetes;
+    }
+
+    public int getMejorPesoNoAsignado() {
+        return mejorPesoNoAsignado;
+    }
+
 }
