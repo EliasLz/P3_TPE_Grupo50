@@ -37,9 +37,7 @@ public class Servicios {
         return paquetesPorCodigo.get(codigoPaquete);
     }
 
-    // O(n) para devolver la lista sin romper encapsulamiento (lo mismo aplicaria
-    // para los demas servicios),
-    // si no seria O(1).
+    // O(n) para devolver la lista sin romper encapsulamiento 
     public List<Paquete> servicio2(boolean contieneAlimentos) {
         if (contieneAlimentos)
             return new ArrayList<>(this.conAlimentos);
